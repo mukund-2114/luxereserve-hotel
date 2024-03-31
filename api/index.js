@@ -17,7 +17,7 @@ app.use(cors({
 }));
 
 app.options('/places', (req, res) => {
-    res.header('Access-Control-Allow-Origin', 'https://luxereserve-hotel.onrender.com3');
+    res.header('Access-Control-Allow-Origin', 'https://luxereserve-hotel.onrender.com');
     res.header('Access-Control-Allow-Methods', 'GET, PUT, POST, DELETE');
     res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     res.sendStatus(200);

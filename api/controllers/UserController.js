@@ -5,6 +5,7 @@ const jwt = require('jsonwebtoken')
 require('dotenv').config()
 const imagedownload = require('image-downloader');
 const Place = require("../models/Place");
+const path = require('path');
 
 
 const registerUser = async (req, res) => {
@@ -59,7 +60,8 @@ const getProfile = (req, res) => {
 
     const { token } = req.cookies;
     if (token) {
-        jwt.verify(token, process.env.JWT_SECRET, {maxAge:"15minutes"}, (err, user) => {
+        jwt.verify(token, process.env.JWT_SECRET, {}, (err, user) => {
+
             res.json(user);
         })
 
@@ -77,10 +79,11 @@ const logoutUser = (req, res) => {
 }
 
 const uploadLinkPhoto = async (req, res) => {
-
+    // console.log("------------",path.join(__dirname,"../uploads"))
     const { link } = req.body;
     const newName = Date.now() + '.jpg';
-    const dest = 'C:/Users/mdrkk/OneDrive/Desktop/airbnbreact/api/uploads/' + newName;
+    const dest = path.join(__dirname,"../uploads/") + newName;
+ 
     await imagedownload.image({
         url: link,
         dest: dest,
@@ -93,7 +96,7 @@ const addPlace = async (req, res) => {
     const { token } = req.cookies;
     let user;
 
-    jwt.verify(token, process.env.JWT_SECRET, {  maxAge: "15minutes"}, (err, currentUser) => {
+    jwt.verify(token, process.env.JWT_SECRET, {}, (err, currentUser) => {
         // console.log(user.id)
         if (err) throw err;
         user = currentUser
@@ -124,21 +127,30 @@ const getSinglePlace = async (req, res) => {
 
 const updatePlace = async (req, res) => {
     const { id, title, address, addedPhotos, description, price, perks, extraInfo, checkIn, checkOut, maxGuests } = req.body;
-    const { token } = req.cookies;
+    // const { token } = req.cookies;
+    // console.log("debugging")
 
-
-    jwt.verify(token, process.env.JWT_SECRET, {}, async (err, currentUser) => {
-        const placeDoc = await Place.findById(id);
-        if (err) throw err;
-        if (currentUser.id === placeDoc.owner.toString()) {
-            placeDoc.set({
-                title, address, photos: addedPhotos, price, description, perks, extraInfo, checkIn, checkOut, maxGuests
-            })
-            await placeDoc.save()
-            res.status(201).json('ok')
-
-        }
+    const placeDoc = await Place.findById(id);
+    // console.log(placeDoc)
+    placeDoc.set({
+        title, address, photos: addedPhotos, price, description, perks, extraInfo, checkIn, checkOut, maxGuests
     })
+    const result = await placeDoc.save();
+    // console.log(result)
+    if(result){
+        res.status(200).json({"message": "Place updated successfully"})
+    }
+    else{
+        res.status(200).json({"message": "Error updating place"})
+    }
+    // jwt.verify(token, process.env.JWT_SECRET, {}, async (err, currentUser) => {
+    //     if (err) throw err;
+    //     if (currentUser.id === placeDoc.owner.toString()) {
+            
+    //         res.status(201).json('ok')
+
+    //     }
+    // })
 
 }
 

@@ -11,15 +11,30 @@ const cookieParser  = require('cookie-parser')
 connectDatabase();
 app.use(cors({
     credentials:true,
-    origin:'http://localhost:5173'
+    origin:'http://localhost:5173',
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
 
 }));
+
+app.options('/places', (req, res) => {
+    res.header('Access-Control-Allow-Origin', 'http://localhost:5173');
+    res.header('Access-Control-Allow-Methods', 'GET, PUT, POST, DELETE');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    res.sendStatus(200);
+  });
+  
 app.use('/uploads', express.static(__dirname+'/uploads'));
 
 app.use(cookieParser())
 app.use(express.json());
 
 app.use(router)
+
+// app.use(cors({
+//     origin: 'http://localhost:5173',
+//     methods: ['GET', 'POST', 'PUT', 'DELETE'], // Allow PUT method
+//     allowedHeaders: ['Content-Type', 'Authorization'],
+//   }));
 
 app.listen(3000, (req, res) => {
     console.log('Server listening on port 3000')

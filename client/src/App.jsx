@@ -11,7 +11,7 @@ import AccountPage from "./Pages/AccountPage";
 import SinglePlace from "./Pages/SinglePlace";
 import Footer from "./Components/Footer";
 
-axios.defaults.baseURL = 'https://luxereserve-hotel.onrender.com'
+axios.defaults.baseURL = 'https://luxereserve-hotel-api.onrender.com'
 axios.defaults.withCredentials = true;
 
 

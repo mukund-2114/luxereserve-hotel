@@ -42,7 +42,7 @@ const loginUser = async (req, res) => {
         }
         const isMatch = await bcrypt.compare(password, user.password)
         if (isMatch) {
-            const token = jwt.sign({ email: user.email, id: user._id, name: user.name }, process.env.JWT_SECRET, { expiresIn: "10seconds" })
+            const token = jwt.sign({ email: user.email, id: user._id, name: user.name }, process.env.JWT_SECRET, { expiresIn: "10minutes" })
             res.cookie('token', token)
             res.status(200).json(user)
         }
@@ -187,6 +187,7 @@ const bookPlace = async (req, res) => {
 
 const getBookings = async (req, res) => {
     const { token } = req.cookies;
+    console.log(token)
     jwt.verify(token, process.env.JWT_SECRET, {}, async (err, currentUser) => {
         // console.log(user.id)
         if (err) throw err;

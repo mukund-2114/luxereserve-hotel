@@ -199,7 +199,7 @@ const getBookings = async (req, res) => {
         // });
 
 
-        res.json(bookings)
+        res.status(200).json(bookings)
     })
 }
 

@@ -200,7 +200,7 @@ const getBookings = async (req, res) => {
         // });
 
 
-        res.status(200).json(bookings)
+        res.status(200).json({bookings})
     })
 }
 

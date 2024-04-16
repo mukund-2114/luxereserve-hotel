@@ -5,6 +5,7 @@ const jwt = require('jsonwebtoken')
 require('dotenv').config()
 const imagedownload = require('image-downloader');
 const Place = require("../models/Place");
+const path = require('path');
 
 
 const registerUser = async (req, res) => {
@@ -42,7 +43,7 @@ const loginUser = async (req, res) => {
         }
         const isMatch = await bcrypt.compare(password, user.password)
         if (isMatch) {
-            const token = jwt.sign({ email: user.email, id: user._id, name: user.name }, process.env.JWT_SECRET, { expiresIn: "10minutes" })
+            const token = jwt.sign({ email: user.email, id: user._id, name: user.name }, process.env.JWT_SECRET, { expiresIn: "15minutes" })
             res.cookie('token', token)
             res.status(200).json(user)
         }
@@ -56,35 +57,21 @@ const loginUser = async (req, res) => {
 }
 
 const getProfile = (req, res) => {
+
     const { token } = req.cookies;
-    // console.log(token)
-    try {
-        if (!token) {
-            throw new Error('NoTokenProvided');
-        }
-        const user = verifyToken(token);
-        res.json(user);
-    } catch (error) {
-        if (error.message === 'TokenExpiredError') {
-            res.status(401).json({ message: 'Session Expired. Please log in again.' });
-        } else if (error.message === 'NoTokenProvided') {
-            res.status(401).json({ message: 'No token provided. Please log in.' });
-        } else {
-            res.status(500).json({ message: 'Internal Server Error. Please try again later.' });
-        }
+    if (token) {
+        jwt.verify(token, process.env.JWT_SECRET, {}, (err, user) => {
+
+            res.json(user);
+        })
+
     }
-};
-
-
-const verifyToken = (token) => {
-    try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        return decoded;
-    } catch (error) {
-        throw new Error('TokenExpiredError');
+    else {
+        res.json(null);
     }
-};
-
+    // res.send({"Authenciated":true,data:req.user})
+    // res.json(user)
+}
 const logoutUser = (req, res) => {
     res.clearCookie('token');
 
@@ -92,10 +79,11 @@ const logoutUser = (req, res) => {
 }
 
 const uploadLinkPhoto = async (req, res) => {
-
+    // console.log("------------",path.join(__dirname,"../uploads"))
     const { link } = req.body;
     const newName = Date.now() + '.jpg';
-    const dest = 'C:/Users/mdrkk/OneDrive/Desktop/airbnbreact/api/uploads/' + newName;
+    const dest = path.join(__dirname,"../uploads/") + newName;
+ 
     await imagedownload.image({
         url: link,
         dest: dest,
@@ -118,30 +106,20 @@ const addPlace = async (req, res) => {
         owner: user.id,
         title, address, photos: addedPhotos, price, description, perks, extraInfo, checkIn, checkOut, maxGuests
     })
-    
+
     return res.status(201).json({ placeData })
 
 }
 
 const getPlaces = async (req, res) => {
     const { token } = req.cookies;
+    jwt.verify(token, process.env.JWT_SECRET, {}, async (err, currentUser) => {
+        // console.log(user.id)
+        if (err) throw err;
+        res.json(await Place.find({ owner: currentUser.id }))
+    })
 
-    try {
-        const currentUser = jwt.verify(token, process.env.JWT_SECRET);
-        const places = await Place.find({ owner: currentUser.id });
-        res.json(places);
-    } catch (error) {
-        if (error.name === 'TokenExpiredError') {
-            // Handle JWT expiration error
-            res.status(401).json({ message: 'Session expired. Please log in again.' });
-        } else {
-            // Handle other JWT verification errors or internal server errors
-            console.error('JWT verification error:', error.message);
-            res.status(500).json({ message: 'Internal Server Error. Please try again later.' });
-        }
-    }
-};
-
+}
 const getSinglePlace = async (req, res) => {
     const { id } = req.body;
     res.json(await Place.find({ _id: id }))
@@ -149,21 +127,30 @@ const getSinglePlace = async (req, res) => {
 
 const updatePlace = async (req, res) => {
     const { id, title, address, addedPhotos, description, price, perks, extraInfo, checkIn, checkOut, maxGuests } = req.body;
-    const { token } = req.cookies;
+    // const { token } = req.cookies;
+    // console.log("debugging")
 
-
-    jwt.verify(token, process.env.JWT_SECRET, {}, async (err, currentUser) => {
-        const placeDoc = await Place.findById(id);
-        if (err) throw err;
-        if (currentUser.id === placeDoc.owner.toString()) {
-            placeDoc.set({
-                title, address, photos: addedPhotos, price, description, perks, extraInfo, checkIn, checkOut, maxGuests
-            })
-            await placeDoc.save()
-            res.status(201).json({message:"Place Updated successfully"})
-
-        }
+    const placeDoc = await Place.findById(id);
+    // console.log(placeDoc)
+    placeDoc.set({
+        title, address, photos: addedPhotos, price, description, perks, extraInfo, checkIn, checkOut, maxGuests
     })
+    const result = await placeDoc.save();
+    // console.log(result)
+    if(result){
+        res.status(200).json({"message": "Place updated successfully"})
+    }
+    else{
+        res.status(200).json({"message": "Error updating place"})
+    }
+    // jwt.verify(token, process.env.JWT_SECRET, {}, async (err, currentUser) => {
+    //     if (err) throw err;
+    //     if (currentUser.id === placeDoc.owner.toString()) {
+            
+    //         res.status(201).json('ok')
+
+    //     }
+    // })
 
 }
 
@@ -188,8 +175,6 @@ const bookPlace = async (req, res) => {
 
 const getBookings = async (req, res) => {
     const { token } = req.cookies;
-    // console.log("heelo")
-    // console.log(token)
     jwt.verify(token, process.env.JWT_SECRET, {}, async (err, currentUser) => {
         // console.log(user.id)
         if (err) throw err;
@@ -201,8 +186,8 @@ const getBookings = async (req, res) => {
         //     key_secret: 'rzp_test_cfkXColkzW1ZN9'
         // });
 
-        res.status(200).json({bookings})
 
+        res.json(bookings)
     })
 }
 

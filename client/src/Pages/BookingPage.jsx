@@ -7,20 +7,18 @@ const BookingPage = () => {
     const [bookings, setBookings] = useState([])
     useEffect(() => {
         axios.get('/bookings').then(response => {
-            // console.log(response.data)
             setBookings(response.data)
             // console.log(response.data)
         }).catch(err => console.error(err))
     })
-    // console.log(bookings)
     return (
         <div>
-            {/* <h1>hello</h1> */}
+
             {
                 bookings.length > 0 && bookings.map((booking, index) => (
 
+
                     <div className='mx-auto w-8/12 mt-8 border p-2 cursor-pointer' key={index}>
-                        <h1>hoo</h1>
                         <Link to={`/singlePlace/` + booking.place._id} className='flex gap-4' >
                             <div className='' style={{ maxWidth: '200px', minHeight: '150px' }}>
                                 <img src={`http://localhost:3000/uploads/${booking.place.photos[0]}`} alt="" className='w-full h-full' />

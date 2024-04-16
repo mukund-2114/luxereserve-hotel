@@ -36,7 +36,6 @@ const Reserve = ({ place }) => {
             handlePayment();
         }
         else{
-            console.log("error here")
             alert('Please Login first')
         }
     }

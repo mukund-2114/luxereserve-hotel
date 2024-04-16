@@ -43,12 +43,15 @@ const loginUser = async (req, res) => {
         }
         const isMatch = await bcrypt.compare(password, user.password)
         if (isMatch) {
-            const token = jwt.sign({ email: user.email, id: user._id, name: user.name }, process.env.JWT_SECRET, { expiresIn: "15minutes" })
+            const currentTime = Math.floor(Date.now() / 1000); // Current time in seconds since Unix epoch
+            const expirationTime = currentTime + (15 * 60);
+            const token = jwt.sign({ email: user.email, id: user._id, name: user.name }, process.env.JWT_SECRET, { expiresIn: expirationTime })
             res.cookie('token', token,{
                 httpOnly: true,
                 secure: true,
                 sameSite: 'None'
               })
+              
             res.status(200).json(user)
         }
         else {

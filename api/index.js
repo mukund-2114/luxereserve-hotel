@@ -11,18 +11,18 @@ const cookieParser  = require('cookie-parser')
 connectDatabase();
 // app.use(cors({
 //     credentials:true,
-//     origin:'http://localhost:5173',
+//     origin:'https://luxereserve-hotel.onrender.com',
 //     methods: ['GET', 'POST', 'PUT', 'DELETE'],
 
 // }));
 app.use(cors({
     credentials:true,
-    origin:'http://localhost:5173'
+    origin:'https://luxereserve-hotel.onrender.com'
 
 }));
 
 // app.options('/places', (req, res) => {
-//     res.header('Access-Control-Allow-Origin', 'http://localhost:5173');
+//     res.header('Access-Control-Allow-Origin', 'https://luxereserve-hotel.onrender.com');
 //     res.header('Access-Control-Allow-Methods', 'GET, PUT, POST, DELETE');
 //     res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 //     res.sendStatus(200);
@@ -36,7 +36,7 @@ app.use(express.json());
 app.use(router)
 
 // app.use(cors({
-//     origin: 'http://localhost:5173',
+//     origin: 'https://luxereserve-hotel.onrender.com',
 //     methods: ['GET', 'POST', 'PUT', 'DELETE'], // Allow PUT method
 //     allowedHeaders: ['Content-Type', 'Authorization'],
 //   }));

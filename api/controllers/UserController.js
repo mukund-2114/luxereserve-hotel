@@ -57,6 +57,7 @@ const loginUser = async (req, res) => {
 
 const getProfile = (req, res) => {
     const { token } = req.cookies;
+    // console.log(token)
     try {
         if (!token) {
             throw new Error('NoTokenProvided');
@@ -187,7 +188,8 @@ const bookPlace = async (req, res) => {
 
 const getBookings = async (req, res) => {
     const { token } = req.cookies;
-    console.log(token)
+    // console.log("heelo")
+    // console.log(token)
     jwt.verify(token, process.env.JWT_SECRET, {}, async (err, currentUser) => {
         // console.log(user.id)
         if (err) throw err;
@@ -199,8 +201,8 @@ const getBookings = async (req, res) => {
         //     key_secret: 'rzp_test_cfkXColkzW1ZN9'
         // });
 
-
         res.status(200).json({bookings})
+
     })
 }
 

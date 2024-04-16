@@ -67,7 +67,7 @@ const PlacesPage = () => {
                             <div className='border p-2 cursor-pointer' key={index}>
                                 <Link to={`/account/places/${place._id}`} className='flex gap-4'>
                                     <div style={{ maxWidth: '200px', minHeight: '150px' }}>
-                                        <img src={`https://luxereserve-hotel-api.onrender.com/uploads/${place.photos[0]}`} alt='' className='w-full h-full' />
+                                        <img src={`http://localhost:3000/uploads/${place.photos[0]}`} alt='' className='w-full h-full' />
                                     </div>
                                     <div>
                                         <h4 className='text-xl font-semibold'>{place.title}</h4>

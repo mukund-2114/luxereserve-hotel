@@ -11,7 +11,7 @@ export function UserContextProvider({ children }) {
     useEffect(() => {
         const fetchUserProfile = async () => {
             try {
-                const response = await axios.get('/api/profile');
+                const response = await axios.get('/profile');
                 setUser(response.data);
                 setReady(true);
                 setError(null); // Reset error state

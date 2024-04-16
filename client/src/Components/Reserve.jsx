@@ -32,7 +32,7 @@ const Reserve = ({ place }) => {
         const response = await axios.post('/bookings',{
             place: place._id,checkIn,checkOut,numberOfGuests,fullName,phone,price: numberOfNights*place.price
         })
-        if(response.status == 200){
+        if(response.status == 201){
             handlePayment();
         }
         else{

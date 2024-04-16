@@ -11,7 +11,7 @@ const cookieParser  = require('cookie-parser')
 connectDatabase();
 app.use(cors({
     credentials:true,
-    origin:'https://luxereserve-hotel.onrender.com'
+    origin:'http://localhost:5173'
 
 }));
 app.use('/uploads', express.static(__dirname+'/uploads'));

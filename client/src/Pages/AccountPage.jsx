@@ -17,6 +17,7 @@ const AccountPage = () => {
     axios.get('/logout').then((response) => {
       alert('Logged out successfully')
       setUser(null)
+      setReady(false)
     })
   }
 

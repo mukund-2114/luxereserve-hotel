@@ -82,7 +82,7 @@ const getProfile = (req, res) => {
 const logoutUser = (req, res) => {
     res.clearCookie('token');
 
-    res.status(200).json({ message: "hello" });
+    res.status(200).json({ message: "Logged out successfully" });
 }
 
 const uploadLinkPhoto = async (req, res) => {

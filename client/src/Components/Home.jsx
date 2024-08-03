@@ -4,11 +4,16 @@ import { Link } from 'react-router-dom'
 
 const Home = () => {
   const [allPlaces, setallPlaces] = useState([])
+  const [loading, setLoading] = useState(true)
   useEffect(()=>{
     axios.get('/allPlaces').then((response)=>{
         setallPlaces(response.data)
+        setLoading(false)
     })
   },[])
+  if(loading){
+    return "Data Loading"
+  }
   return (
     <div className='grid lg:grid-cols-4 px-72 gap-4 mt-8 gap-y-8'>
         {allPlaces.length > 0 && allPlaces.map((place,index)=>(

@@ -18,13 +18,14 @@ const AddPlace = () => {
     const [checkOut, setCheckOut] = useState('');
     const [maxGuests, setMaxGuests] = useState(1);
     const [price, setPrice] = useState(0);
-    const [redirect, setRedirect] = useState(false)
+    const [redirect, setRedirect] = useState(false);
+    const [selectedPhoto, setSelectedPhoto] = useState(null);
 
 
     useEffect(() => {
         if (id) {
             axios.post('/places/id', { id }).then((response) => {
-                const { title, address, photos, description, perks, extraInfo, checkIn, checkOut, maxGuests,price } = response.data[0];
+                const { title, address, photos, description, perks, extraInfo, checkIn, checkOut, maxGuests, price } = response.data[0];
                 setTitle(title);
                 setAddress(address);
                 setaddedPhotos(photos);
@@ -50,11 +51,23 @@ const AddPlace = () => {
     }
 
     const uploadPhotos = (e) => {
-        console.log(e.target.files)
+        const files = e.target.files;
+        const data = new FormData();
+        for (let i = 0; i < files.length; i++) {
+            data.append('photos', files[i]);
+        }
+        axios.post('/upload-files', data, {
+            headers: { 'Content-type': 'multipart/form-data' }
+        }).then(response => {
+            const { data: filenames } = response;
+            setaddedPhotos(prev => {
+                return [...prev, ...filenames]
+            })
+        })
     }
 
-    const removePhoto = (photo)=>{
-        setaddedPhotos([...addedPhotos.filter(image => image!== photo)])
+    const removePhoto = (photo) => {
+        setaddedPhotos([...addedPhotos.filter(image => image !== photo)])
     }
 
     const savePlace = async (e) => {
@@ -63,25 +76,25 @@ const AddPlace = () => {
         if (id) {
             const placeData = {
                 id,
-                title, address, addedPhotos, description,price
+                title, address, addedPhotos, description, price
                 , perks, extraInfo, checkIn, checkOut, maxGuests
             }
-            
-                const response = await axios.put('/places', placeData);
-                console.log(response)
-                if (response.status === 200) {
-                    alert('Place updated successfully')
-                    setRedirect(true)
-                }
-                else{
-                    alert(response.data.message)
-                }
-        
+
+            const response = await axios.put('/places', placeData);
+            console.log(response)
+            if (response.status === 200) {
+                alert('Place updated successfully')
+                setRedirect(true)
+            }
+            else {
+                alert(response.data.message)
+            }
+
         }
         else {
 
             const placeData = {
-                title, address, addedPhotos, description,price
+                title, address, addedPhotos, description, price
                 , perks, extraInfo, checkIn, checkOut, maxGuests
             }
             try {
@@ -95,11 +108,10 @@ const AddPlace = () => {
                 alert(err);
             }
         }
+    }
 
-        if (redirect) {
-            setRedirect(false)
-            return <Navigate to='/account/places' />
-        }
+    if (redirect) {
+        return <Navigate to='/account/places' />
     }
 
     return (
@@ -119,9 +131,40 @@ const AddPlace = () => {
             <div className='grid md:grid-cols-4 lg:grid-cols-6 grid-cols-3 gap-2'>
 
                 {addedPhotos.length > 0 && addedPhotos.map((photo, index) => (
-                    <div key={index} className='relative'>
-                        <img src={`https://luxereserve-hotel-api.onrender.com/uploads/` + photo} alt="" className='rounded-2xl mt-4 h-28 w-96 ' />
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 absolute right-3 bottom-3 p-0.5 cursor-pointer bg-white rounded-2xl" onClick={()=>{removePhoto(photo)}}>
+                    <div
+                        key={index}
+                        className='relative cursor-move'
+                        draggable
+                        onDragStart={(e) => {
+                            e.dataTransfer.setData('imageIndex', index);
+                        }}
+                        onDragOver={(e) => {
+                            e.preventDefault(); // Necessary to allow dropping
+                        }}
+                        onDrop={(e) => {
+                            e.preventDefault();
+                            const draggedIndex = e.dataTransfer.getData('imageIndex');
+                            const dropIndex = index;
+
+                            if (draggedIndex === "") return; // dragging something else?
+
+                            const parsedDraggedIndex = parseInt(draggedIndex);
+                            if (parsedDraggedIndex === dropIndex) return;
+
+                            const newPhotos = [...addedPhotos];
+                            const [reorderedItem] = newPhotos.splice(parsedDraggedIndex, 1);
+                            newPhotos.splice(dropIndex, 0, reorderedItem);
+
+                            setaddedPhotos(newPhotos);
+                        }}
+                    >
+                        <img
+                            src={photo.startsWith('http') ? photo : `https://luxereserve-hotel-api.onrender.com/uploads/` + photo}
+                            alt=""
+                            className='rounded-2xl mt-4 h-28 w-96 object-cover bg-gray-200 cursor-pointer hover:opacity-90 transition-opacity'
+                            onClick={() => setSelectedPhoto(photo)}
+                        />
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 absolute right-3 bottom-3 p-0.5 cursor-pointer bg-white rounded-2xl" onClick={() => { removePhoto(photo) }}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
                         </svg>
 
@@ -130,6 +173,7 @@ const AddPlace = () => {
                 ))}
 
                 <label className='border bg-transparent cursor-pointer rounded-2xl p-8 flex justify-center items-center gap-2 mt-4'>
+                    <input type="file" multiple hidden onChange={uploadPhotos} />
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
                     </svg>
@@ -145,16 +189,16 @@ const AddPlace = () => {
             <textarea name="" id="" className='' rows="2" onChange={e => setExtraInfo(e.target.value)} value={extraInfo}></textarea>
 
             <h2 className='text-2xl mt-4'>Check In & Check Out</h2>
-            <p className='text-sm text-gray-500'>Enter your check in and check out time along with number of guests</p>
+            <p className='text-sm text-gray-400'>Enter the specific times for check-in and check-out (use 24-hour format, e.g., 14 for 2 PM). Also specify how many guests can stay.</p>
 
             <div className='grid lg:grid-cols-4  gap-3'>
                 <div>
                     <h2>Check in</h2>
-                    <input type="number" className='w-full border rounded-2xl px-4 py-1' onChange={e => setCheckIn(e.target.value)} value={checkIn} />
+                    <input type="time" className='w-full border rounded-2xl px-4 py-1' onChange={e => setCheckIn(e.target.value)} value={checkIn} />
                 </div>
                 <div>
                     <h2>Check out</h2>
-                    <input type="number" className='w-full border rounded-2xl px-4 py-1' onChange={e => setCheckOut(e.target.value)} value={checkOut} />
+                    <input type="time" className='w-full border rounded-2xl px-4 py-1' onChange={e => setCheckOut(e.target.value)} value={checkOut} />
                 </div>
                 <div>
                     <h2>Max Guests</h2>
@@ -167,6 +211,18 @@ const AddPlace = () => {
             </div>
             <button className='bg-primary rounded-full px-4 py-2 text-white w-full my-5' onClick={savePlace}>Save</button>
 
+            {selectedPhoto && (
+                <div className='fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50' onClick={() => setSelectedPhoto(null)}>
+                    <div className='relative max-w-4xl max-h-screen p-4'>
+                        <button onClick={() => setSelectedPhoto(null)} className='absolute -top-2 -right-2 bg-gray-500 text-white rounded-full p-1 cursor-pointer hover:bg-black'>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                        <img src={selectedPhoto.startsWith('http') ? selectedPhoto : `https://luxereserve-hotel-api.onrender.com/uploads/` + selectedPhoto} alt="Full size" className='max-h-[90vh] max-w-full rounded-2xl object-contain' onClick={(e) => e.stopPropagation()} />
+                    </div>
+                </div>
+            )}
         </div>
     )
 }

@@ -1,16 +1,16 @@
 const mongoose = require('mongoose');
 
-const PlaceSchema=  mongoose.Schema({
-    owner: {type:mongoose.Schema.Types.ObjectId, ref:'User'},
+const PlaceSchema = mongoose.Schema({
+    owner: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     title: String,
     address: String,
     photos: [String],
     description: String,
     price: Number,
-    perks:[String],
+    perks: [String],
     extraInfo: String,
-    checkIn: Number,
-    checkOut: Number,
+    checkIn: String,
+    checkOut: String,
     maxGuests: Number,
 });
 

@@ -3,9 +3,7 @@ const Booking = require("../models/Booking");
 const bcrypt = require("bcrypt");
 const jwt = require('jsonwebtoken')
 require('dotenv').config()
-const imagedownload = require('image-downloader');
 const Place = require("../models/Place");
-const path = require('path');
 
 
 const registerUser = async (req, res) => {
@@ -46,12 +44,12 @@ const loginUser = async (req, res) => {
             const currentTime = Math.floor(Date.now() / 1000); // Current time in seconds since Unix epoch
             const expirationTime = currentTime + (15 * 60);
             const token = jwt.sign({ email: user.email, id: user._id, name: user.name }, process.env.JWT_SECRET, { expiresIn: expirationTime })
-            res.cookie('token', token,{
+            res.cookie('token', token, {
                 httpOnly: true,
                 secure: true,
                 sameSite: 'None'
-              })
-              
+            })
+
             res.status(200).json(user)
         }
         else {
@@ -85,17 +83,29 @@ const logoutUser = (req, res) => {
     res.status(200).json({ message: "Logged out successfully" });
 }
 
+const { cloudinary } = require('../config/cloudinary');
+
 const uploadLinkPhoto = async (req, res) => {
-    // console.log("------------",path.join(__dirname,"../uploads"))
     const { link } = req.body;
-    const newName = Date.now() + '.jpg';
-    const dest = path.join(__dirname,"../uploads/") + newName;
- 
-    await imagedownload.image({
-        url: link,
-        dest: dest,
-    })
-    res.status(200).json({ newName });
+    try {
+        const result = await cloudinary.uploader.upload(link, {
+            folder: 'luxereserve',
+        });
+        res.status(200).json({ newName: result.secure_url });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Error uploading from link" });
+    }
+}
+
+const uploadPhoto = (req, res) => {
+    const uploadedFiles = [];
+    if (req.files) {
+        req.files.forEach(file => {
+            uploadedFiles.push(file.path);
+        });
+    }
+    res.json(uploadedFiles);
 }
 
 const addPlace = async (req, res) => {
@@ -108,6 +118,15 @@ const addPlace = async (req, res) => {
         if (err) throw err;
         user = currentUser
     })
+
+    // Validation
+    if (!title || !address || !price || !checkIn || !checkOut || !maxGuests) {
+        return res.status(400).json({ message: "Please fill in all required fields" });
+    }
+
+    if (isNaN(price) || isNaN(maxGuests)) {
+        return res.status(400).json({ message: "Price and Max Guests must be numbers" });
+    }
 
     const placeData = await Place.create({
         owner: user.id,
@@ -138,22 +157,32 @@ const updatePlace = async (req, res) => {
     // console.log("debugging")
 
     const placeDoc = await Place.findById(id);
+
+    // Validation
+    if (!title || !address || !price || !checkIn || !checkOut || !maxGuests) {
+        return res.status(400).json({ message: "Please fill in all required fields" });
+    }
+
+    if (isNaN(price) || isNaN(maxGuests)) {
+        return res.status(400).json({ message: "Price and Max Guests must be numbers" });
+    }
+
     // console.log(placeDoc)
     placeDoc.set({
         title, address, photos: addedPhotos, price, description, perks, extraInfo, checkIn, checkOut, maxGuests
     })
     const result = await placeDoc.save();
     // console.log(result)
-    if(result){
-        res.status(200).json({"message": "Place updated successfully"})
+    if (result) {
+        res.status(200).json({ "message": "Place updated successfully" })
     }
-    else{
-        res.status(200).json({"message": "Error updating place"})
+    else {
+        res.status(200).json({ "message": "Error updating place" })
     }
     // jwt.verify(token, process.env.JWT_SECRET, {}, async (err, currentUser) => {
     //     if (err) throw err;
     //     if (currentUser.id === placeDoc.owner.toString()) {
-            
+
     //         res.status(201).json('ok')
 
     //     }
@@ -198,4 +227,38 @@ const getBookings = async (req, res) => {
     })
 }
 
-module.exports = { registerUser, loginUser, getProfile, logoutUser, uploadLinkPhoto, addPlace, getPlaces, getSinglePlace, updatePlace, allPlaces, bookPlace, getBookings };
+const deletePlace = async (req, res) => {
+    const { id } = req.params;
+    const { token } = req.cookies;
+    jwt.verify(token, process.env.JWT_SECRET, {}, async (err, currentUser) => {
+        if (err) throw err;
+        try {
+            const place = await Place.findOne({ _id: id, owner: currentUser.id });
+            if (!place) {
+                return res.status(404).json({ message: "Place not found or unauthorized" });
+            }
+
+            if (place.photos && place.photos.length > 0) {
+                const deletePromises = place.photos.map(async (photoUrl) => {
+                    if (photoUrl.includes('cloudinary.com')) {
+                        // Extract public ID: matches everything after 'upload/' (plus optional version) up to the file extension
+                        const matches = photoUrl.match(/\/upload\/(?:v\d+\/)?(.+)\.[^.]+$/);
+                        if (matches && matches[1]) {
+                            const publicId = matches[1];
+                            await cloudinary.uploader.destroy(publicId);
+                        }
+                    }
+                });
+                await Promise.all(deletePromises);
+            }
+
+            await Place.deleteOne({ _id: id, owner: currentUser.id });
+            res.status(200).json({ message: "Place and images deleted successfully" });
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ message: "Error deleting place" });
+        }
+    })
+}
+
+module.exports = { registerUser, loginUser, getProfile, logoutUser, uploadLinkPhoto, uploadPhoto, addPlace, getPlaces, getSinglePlace, updatePlace, allPlaces, bookPlace, getBookings, deletePlace };

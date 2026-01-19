@@ -5,25 +5,25 @@ import { Link } from 'react-router-dom'
 const Home = () => {
   const [allPlaces, setallPlaces] = useState([])
   const [loading, setLoading] = useState(true)
-  useEffect(()=>{
-    axios.get('/allPlaces').then((response)=>{
-        setallPlaces(response.data)
-        setLoading(false)
+  useEffect(() => {
+    axios.get('/allPlaces').then((response) => {
+      setallPlaces(response.data)
+      setLoading(false)
     })
-  },[])
-  if(loading){
+  }, [])
+  if (loading) {
     return "Data Loading"
   }
   return (
     <div className='grid lg:grid-cols-4 px-72 gap-4 mt-8 gap-y-8'>
-        {allPlaces.length > 0 && allPlaces.map((place,index)=>(
-          <Link key={index} to={'/singlePlace/'+place._id}>
-              <img src={`https://luxereserve-hotel-api.onrender.com/uploads/`+place.photos[0]} alt="" className='object-cover h-72' />
-              <h2 className='mt-4 font-semibold'>{place.title}</h2>
-              <p className='text-sm'>{place.address}</p>
-              <h2 className='font-semibold text-sm '>$ {place.price} CAD per night</h2>
-          </Link>
-        ))}
+      {allPlaces.length > 0 && allPlaces.map((place, index) => (
+        <Link key={index} to={'/singlePlace/' + place._id}>
+          <img src={place.photos[0]?.startsWith('http') ? place.photos[0] : `http://localhost:3000/uploads/` + place.photos[0]} alt="" className='object-cover h-72' />
+          <h2 className='mt-4 font-semibold'>{place.title}</h2>
+          <p className='text-sm'>{place.address}</p>
+          <h2 className='font-semibold text-sm '>$ {place.price} CAD per night</h2>
+        </Link>
+      ))}
     </div>
   )
 }

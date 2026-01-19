@@ -21,7 +21,7 @@ const BookingPage = () => {
                     <div className='mx-auto w-8/12 mt-8 border p-2 cursor-pointer' key={index}>
                         <Link to={`/singlePlace/` + booking.place._id} className='flex gap-4' >
                             <div className='' style={{ maxWidth: '200px', minHeight: '150px' }}>
-                                <img src={`https://luxereserve-hotel-api.onrender.com/uploads/${booking.place.photos[0]}`} alt="" className='w-full h-full' />
+                                <img src={booking.place.photos[0]?.startsWith('http') ? booking.place.photos[0] : `https://luxereserve-hotel-api.onrender.com/uploads/${booking.place.photos[0]}`} alt="" className='w-full h-full' />
                             </div>
                             <div>
                                 <h4 className='text-xl font-semibold'>{booking.place.title}</h4>

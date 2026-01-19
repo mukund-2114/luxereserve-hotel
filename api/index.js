@@ -1,12 +1,12 @@
 const express = require('express');
 const app = express();
-const cors  = require('cors');
+const cors = require('cors');
 require('dotenv').config();
 const mongoose = require('mongoose');
 const connectDatabase = require('./config/database');
 const registerUser = require('./controllers/UserController');
 const router = require('./routes/userRoutes');
-const cookieParser  = require('cookie-parser')
+const cookieParser = require('cookie-parser')
 
 connectDatabase();
 // app.use(cors({
@@ -16,8 +16,8 @@ connectDatabase();
 
 // }));
 app.use(cors({
-    credentials:true,
-    origin:'https://luxereserve-hotel.onrender.com'
+    credentials: true,
+    origin: 'http://localhost:5173'
 
 }));
 
@@ -27,8 +27,8 @@ app.use(cors({
 //     res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 //     res.sendStatus(200);
 //   });
-  
-app.use('/uploads', express.static(__dirname+'/uploads'));
+
+app.use('/uploads', express.static(__dirname + '/uploads'));
 
 app.use(cookieParser())
 app.use(express.json());

@@ -14,7 +14,6 @@ const {user,setUser} =  useContext(UserContext)
         </div>
         </Link>
 
-        <img src='webwizard.gif' alt=""  width={220} height={60}/>
         
         <div className=" flex border border-gray-300 rounded-full px-4 py-2 gap-2 items-center">
         

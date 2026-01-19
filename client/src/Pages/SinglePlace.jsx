@@ -41,11 +41,11 @@ const SinglePlace = () => {
                 </div> */}
 
             {/* <!-- Slider --> */}
-            <div className='grid lg:grid-cols-4 gap-2' style={{height:"250px"} }>
-                <img src={"https://luxereserve-hotel-api.onrender.com/uploads/" + place.photos[0]} alt="" className='w-full h-[250px]' />
-                <img src={"https://luxereserve-hotel-api.onrender.com/uploads/" + place.photos[1]} alt="" className='w-full h-[250px]' />
-                <img src={"https://luxereserve-hotel-api.onrender.com/uploads/" + place.photos[2]} alt="" className='w-full h-[250px]' />
-                <img src={"https://luxereserve-hotel-api.onrender.com/uploads/" + place.photos[3]} alt="" className='w-full h-[250px]' />
+            <div className='grid lg:grid-cols-4 gap-2' style={{ height: "250px" }}>
+                <img src={place.photos[0]?.startsWith('http') ? place.photos[0] : "https://luxereserve-hotel-api.onrender.com/uploads/" + place.photos[0]} alt="" className='w-full h-[250px]' />
+                <img src={place.photos[1]?.startsWith('http') ? place.photos[1] : "https://luxereserve-hotel-api.onrender.com/uploads/" + place.photos[1]} alt="" className='w-full h-[250px]' />
+                <img src={place.photos[2]?.startsWith('http') ? place.photos[2] : "https://luxereserve-hotel-api.onrender.com/uploads/" + place.photos[2]} alt="" className='w-full h-[250px]' />
+                <img src={place.photos[3]?.startsWith('http') ? place.photos[3] : "https://luxereserve-hotel-api.onrender.com/uploads/" + place.photos[3]} alt="" className='w-full h-[250px]' />
             </div>
             {/* </div> */}
 

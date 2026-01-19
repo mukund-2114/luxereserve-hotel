@@ -109,32 +109,35 @@ const uploadPhoto = (req, res) => {
 }
 
 const addPlace = async (req, res) => {
-    const { title, address, addedPhotos, price, description, perks, extraInfo, checkIn, checkOut, maxGuests } = req.body;
-    const { token } = req.cookies;
-    let user;
+    try {
+        const { title, address, addedPhotos, price, description, perks, extraInfo, checkIn, checkOut, maxGuests } = req.body;
+        const { token } = req.cookies;
+        let user;
 
-    jwt.verify(token, process.env.JWT_SECRET, {}, (err, currentUser) => {
-        // console.log(user.id)
-        if (err) throw err;
-        user = currentUser
-    })
+        jwt.verify(token, process.env.JWT_SECRET, {}, (err, currentUser) => {
+            if (err) throw err;
+            user = currentUser
+        })
 
-    // Validation
-    if (!title || !address || !price || !checkIn || !checkOut || !maxGuests) {
-        return res.status(400).json({ message: "Please fill in all required fields" });
+        // Validation
+        if (!title || !address || !price || !checkIn || !checkOut || !maxGuests) {
+            return res.status(400).json({ message: "Please fill in all required fields" });
+        }
+
+        if (isNaN(price) || isNaN(maxGuests)) {
+            return res.status(400).json({ message: "Price and Max Guests must be numbers" });
+        }
+
+        const placeData = await Place.create({
+            owner: user.id,
+            title, address, photos: addedPhotos, price, description, perks, extraInfo, checkIn, checkOut, maxGuests
+        })
+
+        return res.status(201).json({ placeData })
+    } catch (err) {
+        console.error("Error in addPlace:", err);
+        return res.status(500).json({ message: "Internal server error" });
     }
-
-    if (isNaN(price) || isNaN(maxGuests)) {
-        return res.status(400).json({ message: "Price and Max Guests must be numbers" });
-    }
-
-    const placeData = await Place.create({
-        owner: user.id,
-        title, address, photos: addedPhotos, price, description, perks, extraInfo, checkIn, checkOut, maxGuests
-    })
-
-    return res.status(201).json({ placeData })
-
 }
 
 const getPlaces = async (req, res) => {
@@ -152,42 +155,34 @@ const getSinglePlace = async (req, res) => {
 }
 
 const updatePlace = async (req, res) => {
-    const { id, title, address, addedPhotos, description, price, perks, extraInfo, checkIn, checkOut, maxGuests } = req.body;
-    // const { token } = req.cookies;
-    // console.log("debugging")
+    try {
+        const { id, title, address, addedPhotos, description, price, perks, extraInfo, checkIn, checkOut, maxGuests } = req.body;
 
-    const placeDoc = await Place.findById(id);
+        const placeDoc = await Place.findById(id);
 
-    // Validation
-    if (!title || !address || !price || !checkIn || !checkOut || !maxGuests) {
-        return res.status(400).json({ message: "Please fill in all required fields" });
+        // Validation
+        if (!title || !address || !price || !checkIn || !checkOut || !maxGuests) {
+            return res.status(400).json({ message: "Please fill in all required fields" });
+        }
+
+        if (isNaN(price) || isNaN(maxGuests)) {
+            return res.status(400).json({ message: "Price and Max Guests must be numbers" });
+        }
+
+        placeDoc.set({
+            title, address, photos: addedPhotos, price, description, perks, extraInfo, checkIn, checkOut, maxGuests
+        })
+        const result = await placeDoc.save();
+        if (result) {
+            res.status(200).json({ "message": "Place updated successfully" })
+        }
+        else {
+            res.status(200).json({ "message": "Error updating place" })
+        }
+    } catch (err) {
+        console.error("Error in updatePlace:", err);
+        return res.status(500).json({ message: "Internal server error" });
     }
-
-    if (isNaN(price) || isNaN(maxGuests)) {
-        return res.status(400).json({ message: "Price and Max Guests must be numbers" });
-    }
-
-    // console.log(placeDoc)
-    placeDoc.set({
-        title, address, photos: addedPhotos, price, description, perks, extraInfo, checkIn, checkOut, maxGuests
-    })
-    const result = await placeDoc.save();
-    // console.log(result)
-    if (result) {
-        res.status(200).json({ "message": "Place updated successfully" })
-    }
-    else {
-        res.status(200).json({ "message": "Error updating place" })
-    }
-    // jwt.verify(token, process.env.JWT_SECRET, {}, async (err, currentUser) => {
-    //     if (err) throw err;
-    //     if (currentUser.id === placeDoc.owner.toString()) {
-
-    //         res.status(201).json('ok')
-
-    //     }
-    // })
-
 }
 
 const allPlaces = async (req, res) => {
@@ -195,18 +190,24 @@ const allPlaces = async (req, res) => {
 }
 
 const bookPlace = async (req, res) => {
-    const { place, checkIn, checkOut, numberOfGuests, fullName, phone, price } = req.body;
-    const { token } = req.cookies;
-    jwt.verify(token, process.env.JWT_SECRET, {}, async (err, currentUser) => {
-        if (err) {
-            return res.json('Please Login')
-        }
-        const bookingDoc = await Booking.create({
-            place, userId: currentUser.id, checkIn, checkOut, numberOfGuests, fullName, phone, price
+    try {
+        const { place, checkIn, checkOut, numberOfGuests, fullName, phone, price } = req.body;
+        const { token } = req.cookies;
+        jwt.verify(token, process.env.JWT_SECRET, {}, async (err, currentUser) => {
+            if (err) throw err;
+            try {
+                const bookingDoc = await Booking.create({
+                    place, userId: currentUser.id, checkIn, checkOut, numberOfGuests, fullName, phone, price
+                })
+                return res.status(201).json({ bookingDoc })
+            } catch (err) {
+                return res.status(500).json({ message: "Booking failed" })
+            }
         })
-        return res.status(201).json({ bookingDoc })
-    })
-
+    } catch (err) {
+        console.error("Error in bookPlace:", err);
+        return res.status(500).json({ message: "Internal server error" });
+    }
 }
 
 const getBookings = async (req, res) => {

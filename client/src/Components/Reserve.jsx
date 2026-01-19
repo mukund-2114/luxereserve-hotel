@@ -1,44 +1,50 @@
 import React, { useContext, useEffect, useState } from 'react'
 import { differenceInDays } from 'date-fns'
 import axios from 'axios'
-import {UserContext} from '../UserContext'
-import useRazorpay from "react-razorpay";
+import { UserContext } from '../UserContext'
+// import useRazorpay from "react-razorpay";
 import { Navigate } from 'react-router-dom';
-import { loadStripe } from '@stripe/stripe-js';
-
+// import { loadStripe } from '@stripe/stripe-js';
+import PaymentModal from './PaymentModal';
+import PaymentSuccess from './PaymentSuccess';
 
 
 const Reserve = ({ place }) => {
-    const [Razorpay] = useRazorpay();
+    // const [Razorpay] = useRazorpay();
     const [checkIn, setCheckIn] = useState('')
     const [checkOut, setCheckOut] = useState('')
     const [numberOfGuests, setNumberOfGuests] = useState(1)
     const [fullName, setFullName] = useState('');
     const [phone, setPhone] = useState(0);
     const [redirect, setRedirect] = useState(false)
-    const {user} = useContext(UserContext);
+    const { user } = useContext(UserContext);
     const [loading, setloading] = useState(true)
-    
-    useEffect(()=>{
+    const [showPaymentModal, setShowPaymentModal] = useState(false);
+    const [paymentSuccess, setPaymentSuccess] = useState(false);
+
+    useEffect(() => {
         // setFullName(user.name)
         setloading(false)
-    },[user])
+    }, [user])
     let numberOfNights = 0;
     if (checkIn && checkOut) {
         numberOfNights = differenceInDays(new Date(checkOut), new Date(checkIn))
     }
 
-    const makeBooking = async()=>{
-        const response = await axios.post('/bookings',{
-            place: place._id,checkIn,checkOut,numberOfGuests,fullName,phone,price: numberOfNights*place.price
+    const makeBooking = async () => {
+        const response = await axios.post('/bookings', {
+            place: place._id, checkIn, checkOut, numberOfGuests, fullName, phone, price: numberOfNights * place.price
         })
-        if(response.status == 201){
-            handlePayment();
+        if (response.status == 201) {
+            // handlePayment();
+            setShowPaymentModal(true);
         }
-        else{
+        else {
             alert('Please Login first')
         }
     }
+
+    /*
     const handlePayment = async () => {
       
         const options = {
@@ -68,12 +74,22 @@ const Reserve = ({ place }) => {
       
         rzp1.open();
       };
-      if(redirect){
-        return <Navigate to='/account/bookings'/>
-      }
-      if(loading){
+      */
+
+    if (redirect) {
+        return <Navigate to='/account/bookings' />
+    }
+    if (loading) {
         return "Loading...";
-      }
+    }
+
+    if (paymentSuccess) {
+        return <PaymentSuccess onComplete={() => {
+            setPaymentSuccess(false);
+            setRedirect(true);
+        }} />;
+    }
+
     return (
         <div className='w-4/12 mt-16 rounded-2xl border border-gray-200 h-2/4 p-6'>
             <h2 className='font-bold'>${place.price} CAD per night</h2>
@@ -97,12 +113,12 @@ const Reserve = ({ place }) => {
                     <>
                         <div className='w-full'>
                             <span className='text-sm' >Full Name</span>
-                            <input type="text" value={fullName} onChange={(e)=>setFullName(e.target.value)} />
+                            <input type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} />
                         </div>
 
                         <div className='w-full'>
                             <span className='text-sm' >Phone Number</span>
-                            <input type="number" value={phone} onChange={e=> setPhone(e.target.value)}/>
+                            <input type="number" value={phone} onChange={e => setPhone(e.target.value)} />
                         </div>
                     </>
                 )}
@@ -113,7 +129,17 @@ const Reserve = ({ place }) => {
                 <span>${place.price * numberOfNights}</span>
             </div>
 
-    
+            {showPaymentModal && (
+                <PaymentModal
+                    price={place.price * numberOfNights}
+                    onClose={() => setShowPaymentModal(false)}
+                    onSuccess={() => {
+                        setShowPaymentModal(false);
+                        setPaymentSuccess(true);
+                    }}
+                />
+            )}
+
         </div>
     )
 }

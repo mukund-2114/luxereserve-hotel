@@ -7,8 +7,16 @@ import BookingPage from './BookingPage'
 
 const AccountPage = () => {
   const { user, ready, setUser } = useContext(UserContext)
-  const {action} =useParams();
+  let { subpage } = useParams();
+  if (subpage === undefined) {
+    subpage = 'profile'
+  }
+  const { action } = useParams();
   // console.log(user)
+  if (!ready) {
+    return 'Loading...';
+  }
+
   if (ready && !user) {
     return <Navigate to='/login' />
   }
@@ -21,10 +29,6 @@ const AccountPage = () => {
     })
   }
 
-  let { subpage } = useParams();
-  if (subpage === undefined) {
-    subpage = 'profile'
-  }
   function linkClasses(type = null) {
     let classes = 'px-6 py-2 rounded-full inline-flex gap-1'
     if (type == subpage) {
@@ -46,22 +50,27 @@ const AccountPage = () => {
           Profile
         </Link>
         {
-          user.email!=='admin@admin.com' &&
-          <Link to='/account/bookings' className={linkClasses('bookings')}>
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
-          </svg>
+          // Only show My Bookings if user exists and is NOT admin
+          user && user.email !== 'admin@admin.com' && (
+            <Link to='/account/bookings' className={linkClasses('bookings')}>
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+              </svg>
 
-          My Bookings
-        </Link>
+              My Bookings
+            </Link>
+          )
         }
-        {user.email === 'admin@admin.com' && 
-          <Link to='/account/places' className={linkClasses('places')}>
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
-          </svg>
-          My Accommodations
-        </Link>
+        {
+          // Only show My Accommodations if user exists AND is admin
+          user && user.email === 'admin@admin.com' && (
+            <Link to='/account/places' className={linkClasses('places')}>
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+              </svg>
+              My Accommodations
+            </Link>
+          )
         }
       </div>
 
@@ -81,12 +90,12 @@ const AccountPage = () => {
       )}
 
 
-      {(subpage === 'places' && user.email === 'admin@admin.com' ) && (
+      {(subpage === 'places' && user && user.email === 'admin@admin.com') && (
         <PlacesPage />
       )}
 
-      {subpage ===  'bookings' && (
-        <BookingPage/>
+      {subpage === 'bookings' && (
+        <BookingPage />
       )}
 
 

@@ -41,6 +41,12 @@ app.use(router)
 //     allowedHeaders: ['Content-Type', 'Authorization'],
 //   }));
 
+// Global Error Handler
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).json({ message: 'Internal Server Error', error: err.message });
+});
+
 app.listen(3000, (req, res) => {
     console.log('Server listening on port 3000')
 })

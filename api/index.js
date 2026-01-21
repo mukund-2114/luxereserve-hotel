@@ -33,7 +33,9 @@ app.use('/uploads', express.static(__dirname + '/uploads'));
 app.use(cookieParser())
 app.use(express.json());
 
-app.use(router)
+// app.js / index.js
+app.use("/api", router);
+
 
 // app.use(cors({
 //     origin: 'https://luxereserve-hotel.onrender.com',

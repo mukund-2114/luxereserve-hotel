@@ -60,14 +60,16 @@ const loginUser = async (req, res) => {
 }
 
 const getProfile = (req, res) => {
-
     const { token } = req.cookies;
     if (token) {
         jwt.verify(token, process.env.JWT_SECRET, {}, (err, user) => {
-            if (err) return res.json(null);
+            if (err) {
+                // Token is invalid/expired -> Clear it so client knows to logout
+                res.clearCookie('token');
+                return res.json(null);
+            }
             res.json(user);
         })
-
     }
     else {
         res.json(null);

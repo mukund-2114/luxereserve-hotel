@@ -32,15 +32,12 @@ const Reserve = ({ place }) => {
     }
 
     const makeBooking = async () => {
-        const response = await axios.post('/bookings', {
-            place: place._id, checkIn, checkOut, numberOfGuests, fullName, phone, price: numberOfNights * place.price
-        })
-        if (response.status == 201) {
-            // handlePayment();
-            setShowPaymentModal(true);
+        if (!user) {
+            alert('Please Login first');
+            return;
         }
-        else {
-            alert('Please Login first')
+        if (numberOfNights > 0) {
+            setShowPaymentModal(true);
         }
     }
 
@@ -133,9 +130,19 @@ const Reserve = ({ place }) => {
                 <PaymentModal
                     price={place.price * numberOfNights}
                     onClose={() => setShowPaymentModal(false)}
-                    onSuccess={() => {
-                        setShowPaymentModal(false);
-                        setPaymentSuccess(true);
+                    onSuccess={async () => {
+                        try {
+                            const response = await axios.post('/bookings', {
+                                place: place._id, checkIn, checkOut, numberOfGuests, fullName, phone, price: numberOfNights * place.price
+                            });
+                            if (response.status === 200 || response.status === 201) {
+                                setShowPaymentModal(false);
+                                setPaymentSuccess(true);
+                            }
+                        } catch (err) {
+                            console.error("Booking failed:", err);
+                            alert("Payment successful but booking failed. Please contact support.");
+                        }
                     }}
                 />
             )}

@@ -4,6 +4,9 @@ const { createPaymentIntent } = require('../controllers/PaymentController');
 const { upload } = require('../config/cloudinary');
 const router = express.Router();
 
+router.get('/', (req, res) => {
+    res.send('Luxereserve API Running')
+})
 router.post('/register', registerUser)
 router.post('/login', loginUser)
 router.get('/profile', getProfile)
@@ -19,5 +22,6 @@ router.get('/allPlaces', allPlaces)
 router.post('/bookings', bookPlace)
 router.get('/bookings', getBookings)
 router.post('/create-payment-intent', createPaymentIntent)
+
 
 module.exports = router

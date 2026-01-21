@@ -193,6 +193,7 @@ const bookPlace = async (req, res) => {
     try {
         const { place, checkIn, checkOut, numberOfGuests, fullName, phone, price } = req.body;
         const { token } = req.cookies;
+        console.log("token", token)
         jwt.verify(token, process.env.JWT_SECRET, {}, async (err, currentUser) => {
             if (err) throw err;
             try {

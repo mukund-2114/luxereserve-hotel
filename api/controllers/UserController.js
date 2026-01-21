@@ -41,9 +41,7 @@ const loginUser = async (req, res) => {
         }
         const isMatch = await bcrypt.compare(password, user.password)
         if (isMatch) {
-            const currentTime = Math.floor(Date.now() / 1000); // Current time in seconds since Unix epoch
-            const expirationTime = currentTime + (15 * 60);
-            const token = jwt.sign({ email: user.email, id: user._id, name: user.name }, process.env.JWT_SECRET, { expiresIn: expirationTime })
+            const token = jwt.sign({ email: user.email, id: user._id, name: user.name }, process.env.JWT_SECRET, { expiresIn: '24h' })
             res.cookie('token', token, {
                 httpOnly: true,
                 secure: true,
@@ -66,7 +64,7 @@ const getProfile = (req, res) => {
     const { token } = req.cookies;
     if (token) {
         jwt.verify(token, process.env.JWT_SECRET, {}, (err, user) => {
-
+            if (err) return res.json(null);
             res.json(user);
         })
 
@@ -74,12 +72,10 @@ const getProfile = (req, res) => {
     else {
         res.json(null);
     }
-    // res.send({"Authenciated":true,data:req.user})
-    // res.json(user)
 }
 const logoutUser = (req, res) => {
     res.clearCookie('token');
-    res.cookie('token', null)
+    res.cookie('token', '', { expires: new Date(0) })
     res.status(200).json({ message: "Logged out successfully" });
 }
 
@@ -112,12 +108,16 @@ const addPlace = async (req, res) => {
     try {
         const { title, address, addedPhotos, price, description, perks, extraInfo, checkIn, checkOut, maxGuests } = req.body;
         const { token } = req.cookies;
-        let user;
 
+        if (!token) return res.status(401).json({ message: "Authentication required" });
+
+        let user;
         jwt.verify(token, process.env.JWT_SECRET, {}, (err, currentUser) => {
-            if (err) throw err;
+            if (err) return res.status(401).json({ message: "Invalid token" });
             user = currentUser
         })
+
+        if (!user) return; // Stop if verification failed
 
         // Validation
         if (!title || !address || !price || !checkIn || !checkOut || !maxGuests) {
@@ -142,9 +142,10 @@ const addPlace = async (req, res) => {
 
 const getPlaces = async (req, res) => {
     const { token } = req.cookies;
+    if (!token) return res.json([]);
+
     jwt.verify(token, process.env.JWT_SECRET, {}, async (err, currentUser) => {
-        // console.log(user.id)
-        if (err) throw err;
+        if (err) return res.json([]);
         res.json(await Place.find({ owner: currentUser.id }))
     })
 
@@ -193,9 +194,13 @@ const bookPlace = async (req, res) => {
     try {
         const { place, checkIn, checkOut, numberOfGuests, fullName, phone, price } = req.body;
         const { token } = req.cookies;
-        console.log("token", token)
+
+        if (!token) {
+            return res.status(401).json({ message: "Authentication required" });
+        }
+
         jwt.verify(token, process.env.JWT_SECRET, {}, async (err, currentUser) => {
-            if (err) throw err;
+            if (err) return res.status(401).json({ message: "Invalid token" });
             try {
                 const bookingDoc = await Booking.create({
                     place, userId: currentUser.id, checkIn, checkOut, numberOfGuests, fullName, phone, price
@@ -213,18 +218,11 @@ const bookPlace = async (req, res) => {
 
 const getBookings = async (req, res) => {
     const { token } = req.cookies;
+    if (!token) return res.status(401).json({ message: "Authentication required" });
+
     jwt.verify(token, process.env.JWT_SECRET, {}, async (err, currentUser) => {
-        // console.log(user.id)
-        if (err) throw err;
+        if (err) return res.status(401).json({ message: "Invalid token" });
         const bookings = await Booking.find({ userId: currentUser.id }).populate('place')
-
-
-        // const instance = new Razorpay({
-        //     key_id: 'rzp_test_cfkXColkzW1ZN9',
-        //     key_secret: 'rzp_test_cfkXColkzW1ZN9'
-        // });
-
-
         res.json(bookings)
     })
 }

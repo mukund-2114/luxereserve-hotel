@@ -1,4 +1,4 @@
-name: Deploy to AWS EC2
+name: Deploy LuxeReserve to EC2
 
 on:
   push:
@@ -7,79 +7,38 @@ on:
 
 jobs:
   deploy:
-    name: Deploy to EC2
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Deploy to EC2 via SSH (DEBUG MODE)
+      - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
-          port: 22
           script: |
             set -e
 
-            echo "=============================="
-            echo " WHO AM I"
-            echo "=============================="
-            whoami
-
-            echo "=============================="
-            echo " CURRENT DIRECTORY"
-            echo "=============================="
-            pwd
-
-            echo "=============================="
-            echo " HOME CONTENT"
-            echo "=============================="
-            ls -la /home/ubuntu
-
-            echo "=============================="
-            echo " GO TO PROJECT DIRECTORY"
-            echo "=============================="
+            echo "📦 Going to project directory"
             cd /home/ubuntu/luxereserve-hotel
 
-            echo "=============================="
-            echo " PROJECT CONTENT"
-            echo "=============================="
-            ls -la
-
-            echo "=============================="
-            echo " PULL LATEST CODE"
-            echo "=============================="
+            echo "⬇️ Pulling latest code"
             git pull origin main
 
-            echo "=============================="
-            echo " BACKEND DEPLOY"
-            echo "=============================="
+            echo "🔧 Backend setup"
             cd api
             npm install
-            pm2 reload api || pm2 start index.js --name api
+            pm2 restart api || pm2 start index.js --name api
             cd ..
 
-            echo "=============================="
-            echo " FRONTEND DEPLOY"
-            echo "=============================="
+            echo "🎨 Frontend setup"
             cd client
             npm install
             npm run build
+            cd ..
 
-            echo "=============================="
-            echo " COPY FRONTEND BUILD TO NGINX"
-            echo "=============================="
-            sudo rm -rf /var/www/html/*
-            sudo cp -r dist/* /var/www/html/
+            echo "🌐 Reloading Nginx"
+            sudo nginx -t
+            sudo systemctl reload nginx
 
-            echo "=============================="
-            echo " RESTART NGINX"
-            echo "=============================="
-            sudo systemctl restart nginx
-
-            echo "=============================="
-            echo " DEPLOYMENT COMPLETE"
-            echo "=============================="
+            echo "✅ Deployment completed"

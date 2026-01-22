@@ -1,0 +1,47 @@
+name: Deploy to AWS EC2
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: Deploy to EC2
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy to Server
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            # Navigate to project directory
+            cd ${{ secrets.PROJECT_PATH }}
+            
+            # Pull latest changes
+            git pull origin main
+            
+            # Backend Deployment
+            echo "Deploying Backend..."
+            cd api
+            npm install
+            # Restart backend (assuming PM2 is used)
+            pm2 restart all || pm2 start index.js --name "api"
+            cd ..
+            
+            # Frontend Deployment
+            echo "Deploying Frontend..."
+            cd client
+            npm install
+            npm run build
+            # Ensure Nginx is pointing to the client/dist folder
+            # If strictly copying is needed (e.g. to /var/www/html), add that here:
+            # sudo cp -r dist/* /var/www/html/
+            
+            echo "Deployment Complete!"

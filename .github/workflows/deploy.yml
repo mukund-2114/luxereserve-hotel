@@ -11,40 +11,75 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Deploy to Server
+      - name: Deploy to EC2 via SSH (DEBUG MODE)
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
+          port: 22
           script: |
-            echo "Deploying to: ${{ secrets.PROJECT_PATH }}"
-            cd ${{ secrets.PROJECT_PATH }}
-            pwd
-            ls
+            set -e
 
-            
-            # Pull latest changes
+            echo "=============================="
+            echo " WHO AM I"
+            echo "=============================="
+            whoami
+
+            echo "=============================="
+            echo " CURRENT DIRECTORY"
+            echo "=============================="
+            pwd
+
+            echo "=============================="
+            echo " HOME CONTENT"
+            echo "=============================="
+            ls -la /home/ubuntu
+
+            echo "=============================="
+            echo " GO TO PROJECT DIRECTORY"
+            echo "=============================="
+            cd /home/ubuntu/luxereserve-hotel
+
+            echo "=============================="
+            echo " PROJECT CONTENT"
+            echo "=============================="
+            ls -la
+
+            echo "=============================="
+            echo " PULL LATEST CODE"
+            echo "=============================="
             git pull origin main
-            
-            # Backend Deployment
-            echo "Deploying Backend..."
+
+            echo "=============================="
+            echo " BACKEND DEPLOY"
+            echo "=============================="
             cd api
             npm install
-            # Restart backend (assuming PM2 is used)
-            pm2 restart all || pm2 start index.js --name "api"
+            pm2 reload api || pm2 start index.js --name api
             cd ..
-            
-            # Frontend Deployment
-            echo "Deploying Frontend..."
+
+            echo "=============================="
+            echo " FRONTEND DEPLOY"
+            echo "=============================="
             cd client
             npm install
             npm run build
-            # Ensure Nginx is pointing to the client/dist folder
-            # If strictly copying is needed (e.g. to /var/www/html), add that here:
-            # sudo cp -r dist/* /var/www/html/
-            
-            echo "Deployment Complete!"
+
+            echo "=============================="
+            echo " COPY FRONTEND BUILD TO NGINX"
+            echo "=============================="
+            sudo rm -rf /var/www/html/*
+            sudo cp -r dist/* /var/www/html/
+
+            echo "=============================="
+            echo " RESTART NGINX"
+            echo "=============================="
+            sudo systemctl restart nginx
+
+            echo "=============================="
+            echo " DEPLOYMENT COMPLETE"
+            echo "=============================="

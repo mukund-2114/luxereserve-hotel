@@ -11,7 +11,7 @@ import AccountPage from "./Pages/AccountPage";
 import SinglePlace from "./Pages/SinglePlace";
 import Footer from "./Components/Footer";
 
-axios.defaults.baseURL = import.meta.env.VITE_API_URL || 'http://localhost:3000'
+axios.defaults.baseURL = import.meta.env.VITE_API_URL || '/api'
 axios.defaults.withCredentials = true;
 
 
@@ -19,7 +19,6 @@ function App() {
   return (
     <UserContextProvider>
       <BrowserRouter>
-    
         <Navbar/>
         <Routes>
           <Route path="/" element={<Home/>}/>
@@ -31,7 +30,6 @@ function App() {
           <Route path="/singlePlace/:id" element={<SinglePlace/>}/>
         </Routes>
         <Footer/>
-        
       </BrowserRouter>
     </UserContextProvider>
   );

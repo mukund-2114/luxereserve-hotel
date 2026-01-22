@@ -44,8 +44,8 @@ const loginUser = async (req, res) => {
             const token = jwt.sign({ email: user.email, id: user._id, name: user.name }, process.env.JWT_SECRET, { expiresIn: '24h' })
             res.cookie('token', token, {
                 httpOnly: true,
-                secure: false, // Set to false to allow HTTP (IP address)
-                sameSite: 'Lax' // Required if secure is false; allows usage on same domain/IP
+                secure: true,
+                sameSite: 'None'
             })
 
             res.status(200).json(user)
@@ -77,7 +77,7 @@ const getProfile = (req, res) => {
 }
 const logoutUser = (req, res) => {
     res.clearCookie('token');
-    res.cookie('token', '', { expires: new Date(0), secure: false, sameSite: 'Lax' })
+    res.cookie('token', '', { expires: new Date(0), secure: true, sameSite: 'None' })
     res.status(200).json({ message: "Logged out successfully" });
 }
 

@@ -30,7 +30,7 @@ const RegisterPage = () => {
   }
   return (
     <div className='login'>
-        <div className='w-3/12 mx-auto mt-8 flex flex-col border border-gray-300 rounded-lg '>
+        <div className='w-11/12 md:w-1/2 lg:w-4/12 xl:w-3/12 mx-auto mt-8 flex flex-col border border-gray-300 rounded-lg '>
         <h3 className='text-center py-5 px-4 font-bold'>Register</h3>
         <hr />
         <form className='p-3' onSubmit={registerUser}>

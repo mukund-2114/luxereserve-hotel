@@ -32,7 +32,7 @@ const LoginPage = () => {
   }
   return (
     <div className='login'>
-      <div className='w-3/12 mx-auto mt-8 flex flex-col border border-gray-300 rounded-lg '>
+      <div className='w-11/12 md:w-1/2 lg:w-4/12 xl:w-3/12 mx-auto mt-8 flex flex-col border border-gray-300 rounded-lg '>
         <h3 className='text-center py-5 px-4 font-bold'>Log in or sign up</h3>
         <form className='p-3' onSubmit={loginHandler}>
           <input type="email" placeholder='Enter email' className='w-full rounded-2xl p-2 border' value={email} onChange={(e) => setEmail(e.target.value)} />

@@ -88,7 +88,7 @@ const Reserve = ({ place }) => {
     }
 
     return (
-        <div className='w-4/12 mt-16 rounded-2xl border border-gray-200 h-2/4 p-6'>
+        <div className='w-full md:w-4/12 mt-16 rounded-2xl border border-gray-200 h-auto p-6'>
             <h2 className='font-bold'>${place.price} CAD per night</h2>
             <div className='mt-4   rounded-lg p-3'>
                 <div className='grid grid-cols-2  pb-2'>

@@ -7,7 +7,7 @@ const Navbar = () => {
   const { user, setUser } = useContext(UserContext)
   return (
     <div>
-      <header className="px-72 py-4 flex justify-between items-center">
+      <header className="px-4 md:px-16 lg:px-24 xl:px-72 py-4 flex justify-between items-center">
         <Link to={'/'}>
           <div className="flex space-x-6 text-primary font-bold text-xl">
             <img src="/logo.png" alt="" width={200} height={50} />

@@ -18,7 +18,7 @@ const SinglePlace = () => {
         return "Loading..."
     }
     return (
-        <div className='mx-auto w-7/12 mt-8'>
+        <div className='mx-auto w-full px-4 md:w-10/12 lg:w-9/12 xl:w-7/12 mt-8'>
             <h1 className='font-semibold text-3xl'>{place.title}</h1>
             <div className='flex mt-2'>
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
@@ -41,25 +41,25 @@ const SinglePlace = () => {
                 </div> */}
 
             {/* <!-- Slider --> */}
-            <div className='grid lg:grid-cols-4 gap-2' style={{ height: "250px" }}>
-                <img src={place.photos[0]?.startsWith('http') ? place.photos[0] : "https://luxereserve-hotel-api.onrender.com/uploads/" + place.photos[0]} alt="" className='w-full h-[250px]' />
-                <img src={place.photos[1]?.startsWith('http') ? place.photos[1] : "https://luxereserve-hotel-api.onrender.com/uploads/" + place.photos[1]} alt="" className='w-full h-[250px]' />
-                <img src={place.photos[2]?.startsWith('http') ? place.photos[2] : "https://luxereserve-hotel-api.onrender.com/uploads/" + place.photos[2]} alt="" className='w-full h-[250px]' />
-                <img src={place.photos[3]?.startsWith('http') ? place.photos[3] : "https://luxereserve-hotel-api.onrender.com/uploads/" + place.photos[3]} alt="" className='w-full h-[250px]' />
+            <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2' >
+                <img src={place.photos[0]?.startsWith('http') ? place.photos[0] : "https://luxereserve-hotel-api.onrender.com/uploads/" + place.photos[0]} alt="" className='w-full h-full object-cover aspect-square md:aspect-auto' />
+                <img src={place.photos[1]?.startsWith('http') ? place.photos[1] : "https://luxereserve-hotel-api.onrender.com/uploads/" + place.photos[1]} alt="" className='w-full h-full object-cover aspect-square md:aspect-auto' />
+                <img src={place.photos[2]?.startsWith('http') ? place.photos[2] : "https://luxereserve-hotel-api.onrender.com/uploads/" + place.photos[2]} alt="" className='w-full h-full object-cover aspect-square md:aspect-auto' />
+                <img src={place.photos[3]?.startsWith('http') ? place.photos[3] : "https://luxereserve-hotel-api.onrender.com/uploads/" + place.photos[3]} alt="" className='w-full h-full object-cover aspect-square md:aspect-auto' />
             </div>
             {/* </div> */}
 
 
             {/* about section */}
-            <div className='main flex gap-2'>
-                <div className='w-8/12 mt-8'>
+            <div className='main flex flex-col md:flex-row gap-2'>
+                <div className='w-full md:w-8/12 mt-8'>
                     <h4 className='font-semibold text-2xl mt-8'>About This Place</h4>
                     <p className='my-8'>{place.description}</p>
 
 
                     <hr />
                     <h4 className='font-semibold text-2xl mt-8'>What This Place Offers</h4>
-                    <ul className='grid lg:grid-cols-3 capitalize text-center my-8 gap-2'>
+                    <ul className='grid grid-cols-2 lg:grid-cols-3 capitalize text-center my-8 gap-2'>
                         {place.perks.map(perk => (
                             <li key={perk} className='border rounded-lg p-2'>{perk}</li>
                         ))}
@@ -67,7 +67,7 @@ const SinglePlace = () => {
                     <h4 className='font-semibold text-2xl mt-8'>Other Things To Note</h4>
                     <p className='my-8'>{place.extraInfo}</p>
                     <h4 className='font-semibold text-2xl mt-8'>Timings</h4>
-                    <div className='grid lg:grid-cols-3'>
+                    <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
                         <div className='grid place-items-center'>
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M15 15l-6 6m0 0l-6-6m6 6V9a6 6 0 0112 0v3" />

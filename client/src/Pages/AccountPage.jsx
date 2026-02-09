@@ -76,7 +76,7 @@ const AccountPage = () => {
 
 
       {subpage === 'profile' && (
-        <div className='mx-auto w-6/12 mt-8'>
+        <div className='w-full px-4 md:w-8/12 lg:w-6/12 xl:w-5/12 mx-auto mt-8'>
           <h2 className='text-2xl font-bold'>Personal Info</h2>
           <h4 className='mt-5 font-semibold text-lg'>Legal Name</h4>
           <p className='mb-5'>{user?.name}</p>
